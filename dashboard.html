@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Menú de opciones</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e6f7ff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #006699;
+      margin-bottom: 30px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .app {
+      background-color: #fff;
+      border: 2px solid #006699;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .app:hover {
+      transform: scale(1.05);
+      background-color: #f0f8ff;
+    }
+    .app a {
+      text-decoration: none;
+      color: #006699;
+      font-weight: bold;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: #006699;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    .btn:hover {
+      background-color: #004466;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bienvenido al Menú</h1>
+  <div class="grid">
+    <div class="app"><a href="https://www.youtube.com" target="_blank">YouTube</a></div>
+    <div class="app"><a href="https://www.google.com" target="_blank">Google</a></div>
+    <div class="app"><a href="https://www.wikipedia.org" target="_blank">Wikipedia</a></div>
+    <div class="app"><a href="https://www.facebook.com" target="_blank">Facebook</a></div>
+    <div class="app"><a href="https://www.twitter.com" target="_blank">Twitter</a></div>
+    <div class="app"><a href="https://www.instagram.com" target="_blank">Instagram</a></div>
+  </div>
+
+  <a href="index.html" class="btn">Cerrar sesión</a>
+</body>
+</html>

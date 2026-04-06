@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Acceso Facial</title>
+  <!-- Librerias -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image/dist/teachablemachine-image.min.js"></script>
+  <style>
+    body {
+      font-family: "Times New Roman", 'Times New Roman', Times, serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { color: #333; }
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #probabilidades {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #555;
+    }
+    canvas {
+      border: 5px solid #006699;
+      border-radius: 20px;
+      box-shadow: 0 0 15 rgba(0, 102, 153, 0.6);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sistema de Acceso Facial</h1>
+  <div id="status">Detectando rostro...</div>
+  <div id="probabilidades"></div>
+  <div id="webcam-container"></div>
+  <div id="error-container" style="display:none; margin-top:30px;">
+  <h2 style="color:red; font-size:32px;">INCORRECTO</h2>
+
+
+  <script>
+    window.redirigiendoAutorizado = false;
+window.redirigiendoDenegado = false;
+
+    const URL_FACE = "model_face/";  
+     // Ruta al modelo facial
+    let modelFace, webcam;
+
+    async function initFace() {
+      const modelURL = URL_FACE + "model.json";
+      const metadataURL = URL_FACE + "metadata.json";
+
+      // Cargar modelo facial
+      modelFace = await tmImage.load(modelURL, metadataURL);
+
+      // Configurar webcam
+      webcam = new tmImage.Webcam(320, 240, true); // ancho, alto, espejo
+      await webcam.setup(); // Solicita acceso a la cámara
+      await webcam.play();
+
+      // Insertar el canvas de la webcam en el contenedor
+      document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+      window.requestAnimationFrame(loopFace);
+    }
+
+    async function loopFace() {
+      webcam.update();
+      await predictFace();
+      window.requestAnimationFrame(loopFace);
+    }
+
+    async function predictFace() {
+  const prediction = await modelFace.predict(webcam.canvas);
+  let probText = "";
+
+  prediction.forEach(p => {
+    probText += `${p.className}: ${(p.probability * 100).toFixed(2)}%<br>`;
+  });
+
+  document.getElementById("probabilidades").innerHTML = probText;
+
+  const autorizado = prediction.find(p => p.className === "Persona autorizada");
+  const denegado = prediction.find(p => p.className === "Acceso denegado");
+
+  // CARA CORRECTA
+if (autorizado && autorizado.probability > 0.9) {
+  if (!window.tiempoDetectado) {
+    window.tiempoDetectado = Date.now();
+    document.getElementById("status").innerText = "Verificando identidad...";
+    return;
+  }
+
+  let tiempo = (Date.now() - window.tiempoDetectado) / 1000;
+
+  if (tiempo >= 3) {
+    if (!window.redirigiendoAutorizado) {
+      window.redirigiendoAutorizado = true;
+      document.getElementById("status").innerText = "Acceso concedido";
+
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 1000);
+    }
+  }
+}
+
+// CARA INCORRECTA
+else if (denegado && denegado.probability > 0.8) {
+  if (!window.tiempoDenegado) {
+    window.tiempoDenegado = Date.now();
+    document.getElementById("status").innerText = "Verificando identidad...";
+    return;
+  }
+
+  let tiempo = (Date.now() - window.tiempoDenegado) / 1000;
+
+  if (tiempo >= 3) {
+    if (!window.redirigiendoDenegado) {
+      window.redirigiendoDenegado = true;
+      document.getElementById("status").innerText = "Acceso denegado";
+
+      console.log("Acceso denegado detectado"); // depuración
+
+      setTimeout(() => {
+        window.location.href = "error.html";
+      }, 1000);
+    }
+  }
+}
+
+
+// ESCANEANDO
+else {
+  window.tiempoDetectado = null;
+  window.tiempoDenegado = null;
+  document.getElementById("status").innerText = "Detectando rostro...";
+  }
+} 
+
+  initFace();
+
+  </script>
+</body>
+</html>
